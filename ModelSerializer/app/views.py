@@ -94,3 +94,10 @@ def movie_detail(request, slug):
         movie.delete()
         response["message"] = "Movie deleted successfully"
         return Response(data=response, status=status.HTTP_204_NO_CONTENT)
+
+@api_view(["POST"])
+def tabrik_api(request):
+    ism = request.data["ism"]
+    familiya = request.data["familiya"]
+    age = request.data["age"]
+    return Response(data={"Tabrik": f"Assalomu aleykum {ism} {familiya}. Sizni {age} yoshingiz bilan tabriklaymiz"})

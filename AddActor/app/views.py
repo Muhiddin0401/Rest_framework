@@ -2,10 +2,36 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-
 from .models import Movie, Actors
 from .serializers import MovieSerializers, ActorsSerializers
+
+
+class AddActorToMovieView(CreateAPIView):
+    serializer_class = ActorsSerializers
+
+    def post(self, request, slug, *args, **kwargs):
+        try:
+            movie = Movie.objects.get(slug=slug)
+        except ObjectDoesNotExist:
+            return Response(
+                data = {"error": "Bunday film topilmadi"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception = True)
+        actor = serializer.save()
+
+        movie.actors.add(actor)
+        return Response(
+            data={
+                "message": f"Actor {actor.name} successfully added to movie {movie.title}",
+                "actor": serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 @api_view(["GET", "POST"])
 def actor_api(request):
